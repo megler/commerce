@@ -37,8 +37,7 @@ class AuctionItem(models.Model):
         ("Pr", "Priority"),
         ("Int", "International"),
     )
-    listing_image = models.ImageField(
-        upload_to="./static/auctions/auction_images")
+    listing_image = models.ImageField(upload_to="auction_images")
     item_name = models.CharField(max_length=80)
     price = models.DecimalField(decimal_places=2, max_digits=7)
     quantity = models.IntegerField()
