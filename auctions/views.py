@@ -3,19 +3,22 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from .models import User, Category, ListAuction, Bid, Watchlist
 
 from .models import User
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    return render(request, "auctions/index.html",
+                  {"active_listings": ListAuction.objects.all()})
 
 
 def login_view(request):
     if request.method == "POST":
 
         # Attempt to sign user in
-        username = request.POST["username"]
+        username = request.POST["username"].lower(
+        )  # remove case sensitivity from login
         password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
 
@@ -40,7 +43,7 @@ def logout_view(request):
 
 def register(request):
     if request.method == "POST":
-        username = request.POST["username"]
+        username = request.POST["username"].lower()  # make username lowercase
         email = request.POST["email"]
 
         # Ensure password matches confirmation
