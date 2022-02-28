@@ -1,0 +1,25 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+  <h2>Categories</h2>
+
+  <div class="row">
+    <div class="col-12">
+      {# Loop through category table for list of categories #}
+      {% for category in categories %}
+        <div class="col-lg-6 col-md-4 col-sm-3 col-xs-2 ">{{ category }}
+          <ul>
+            {# 2nd Loop through listings to list each item in a particular category #}
+            {% for list in listings %}
+              {% if list.categories == category %}
+                <li>{{ list.item_name }}</li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

@@ -23,6 +23,9 @@ class Category(models.Model):
                                 choices=AUCTION_CATEGORIES,
                                 default="Brooms")
 
+    categorylist = models.ManyToManyField("ListAuction",
+                                          related_name="auction_categories")
+
     def __str__(self):
         return f"{self.cat_name}"
 
@@ -45,7 +48,10 @@ class ListAuction(models.Model):
     item_condition = models.CharField(max_length=30,
                                       choices=CONDITION,
                                       default="New")
-    categories = models.ManyToManyField(Category)
+    categories = models.ForeignKey(Category,
+                                   null=True,
+                                   on_delete=models.SET_NULL,
+                                   related_name="categories")
 
     def __str__(self):
         return f"Item: {self.item_name}"
