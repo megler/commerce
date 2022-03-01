@@ -40,7 +40,7 @@ class ListAuction(models.Model):
 
     CONDITION = (("New", "New"), ("Used", "Used"), ("Refurbished",
                                                     "Refurbished"))
-    listing_image = models.URLField(null=True)
+
     item_name = models.CharField(max_length=80)
     starting_bid = models.DecimalField(decimal_places=2, max_digits=7)
     quantity = models.IntegerField()
@@ -52,6 +52,7 @@ class ListAuction(models.Model):
                                    null=True,
                                    on_delete=models.SET_NULL,
                                    related_name="categories")
+    listing_image = models.URLField(null=True)
 
     def __str__(self):
         return f"Item: {self.item_name}"

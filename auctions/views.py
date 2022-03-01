@@ -4,8 +4,10 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
 from .models import User, Category, ListAuction, Bid, Watchlist
+from auctions.forms import ListAuctionForm
 
 
 def index(request):
@@ -89,6 +91,7 @@ def active_by_cat(request, cat):
 
     # use of __in credit:
     # https://stackoverflow.com/questions/55994907/the-queryset-value-for-an-exact-lookup-must-be-limited-to-one-result-using-slici
+    # https://docs.djangoproject.com/en/4.0/ref/models/querysets/
 
     get_cat = Category.objects.filter(cat_name=cat).values_list("id",
                                                                 flat=True)
@@ -102,3 +105,25 @@ def active_by_cat(request, cat):
             ListAuction.objects.all().filter(categories__in=get_cat),
         },
     )
+
+
+@login_required(login_url="login")
+def create_listing(request):
+    """ Allow logged in user to create a new listing """
+
+    # Credit: https://forum.djangoproject.com/t/automatically-get-user-id-to-assignate-to-form-when-submitting/5333/6
+
+    form = ListAuctionForm(user=request.user)
+
+    if request.method == "POST":
+        form = ListAuctionForm(request.POST, user=request.user)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.seller = User.objects.get(pk=request.user.id)
+            obj.save()
+            return HttpResponseRedirect(reverse("index"))
+        else:
+            print("ERROR : Form is invalid")
+            print(form.errors)
+    context = {"form": form}
+    return render(request, "auctions/create-listing.html", context)
