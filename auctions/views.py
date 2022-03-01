@@ -1,3 +1,4 @@
+from unicodedata import category
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -80,5 +81,24 @@ def auction_categories(request):
     )
 
 
-def active_by_cat(request):
-    pass
+def active_by_cat(request, cat):
+    """Returns active listings by category"""
+
+    # I believe naming convention for HTML page names is hyphen not underscore
+    # but Google was sketchy on details and I didn't see what I wanted on MDN.
+
+    # use of __in credit:
+    # https://stackoverflow.com/questions/55994907/the-queryset-value-for-an-exact-lookup-must-be-limited-to-one-result-using-slici
+
+    get_cat = Category.objects.filter(cat_name=cat).values_list("id",
+                                                                flat=True)
+
+    return render(
+        request,
+        "auctions/listings-by-cat.html",
+        {
+            "category": cat,
+            "listings":
+            ListAuction.objects.all().filter(categories__in=get_cat),
+        },
+    )
