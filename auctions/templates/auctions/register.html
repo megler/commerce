@@ -1,30 +1,38 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-
-    <h2>Register</h2>
-
-    {% if message %}
-        <div>{{ message }}</div>
-    {% endif %}
-
-    <form action="{% url 'register' %}" method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <input class="form-control" autofocus type="text" name="username" placeholder="Username">
+  <div class="main">
+    <div class="container center-form">
+      <div class="login-main-text text-center">
+        <h2>Register</h2>
+      </div>
+      <div class="col-md-6 col-sm-12 center-form">
+        {% if message %}
+          <div>{{ message }}</div>
+        {% endif %}
+        <div class="login-form">
+          <form action="{% url 'register' %}" method="post">
+            {% csrf_token %}
+            <div class="form-group mb-2">
+              <input class="form-control" autofocus="autofocus" type="text" name="username" placeholder="Username">
+            </div>
+            <div class="form-group mb-2">
+              <input class="form-control" type="email" name="email" placeholder="Email Address">
+            </div>
+            <div class="form-group mb-2">
+              <input class="form-control" type="password" name="password" placeholder="Password">
+            </div>
+            <div class="form-group mb-2">
+              <input class="form-control" type="password" name="confirmation" placeholder="Confirm Password">
+            </div>
+            <button type="submit" value="Login" class="btn btn-black mb-3">Login</button>
+          </form>
+          <p class="mb-3">Already have an account?
+            <a href="{% url 'login' %}">Log In here.</a>
+          </p>
         </div>
-        <div class="form-group">
-            <input class="form-control" type="email" name="email" placeholder="Email Address">
-        </div>
-        <div class="form-group">
-            <input class="form-control" type="password" name="password" placeholder="Password">
-        </div>
-        <div class="form-group">
-            <input class="form-control" type="password" name="confirmation" placeholder="Confirm Password">
-        </div>
-        <input class="btn btn-primary" type="submit" value="Register">
-    </form>
-
-    Already have an account? <a href="{% url 'login' %}">Log In here.</a>
-
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
