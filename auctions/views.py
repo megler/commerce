@@ -23,8 +23,11 @@ def datetime_from_utc_to_local(utc_datetime):
 
 
 def index(request):
-    return render(request, "auctions/index.html",
-                  {"active_listings": ListAuction.objects.all()})
+    return render(
+        request,
+        "auctions/index.html",
+        {"active_listings": ListAuction.objects.all()},
+    )
 
 
 def login_view(request):
@@ -144,9 +147,9 @@ def create_listing(request):
 def get_listing(request, title):
     """Returns single listing by name"""
 
-    get_id = ListAuction.objects.get(item_name=title)
-    get_cat = Category.objects.get(pk=get_id.categories_id)
-    expire = get_id.date_created + timedelta(days=7)
+    get_listing = ListAuction.objects.get(item_name=title)
+    get_cat = Category.objects.get(pk=get_listing.categories_id)
+    expire = get_listing.date_created + timedelta(days=7)
 
     return render(
         request,
@@ -154,6 +157,6 @@ def get_listing(request, title):
         {
             "expire_date": datetime_from_utc_to_local(expire),
             "category": get_cat,
-            "item": get_id,
+            "item": get_listing,
         },
     )
