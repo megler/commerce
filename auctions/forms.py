@@ -21,6 +21,7 @@ class ListAuctionForm(ModelForm):
         self._user = kwargs.pop("user")
         super(ListAuctionForm, self).__init__(*args, **kwargs)
         self.fields["listing_image"].required = False
+        self.fields["categories"].required = False
         self.fields["item_name"].widget.attrs.update({"class": "form-control"})
         self.fields["starting_bid"].widget.attrs.update(
             {"class": "form-control"})
