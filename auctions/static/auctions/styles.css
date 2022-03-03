@@ -1,15 +1,10 @@
-.login-main-text{
+.form-main-text{
     padding-top: 1.5rem;
     color: #000;
 }
 
-.login-main-text h2{
+.form-main-text h2{
     font-weight: 300;
-}
-
-.btn-black{
-    background-color: #000 !important;
-    color: #fff;
 }
 
 .center-form {
