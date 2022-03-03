@@ -10,5 +10,6 @@ urlpatterns = [
     path("register", views.register, name="register"),
     path("categories", views.auction_categories, name="auction_categories"),
     path("create-listing", views.create_listing, name="create_listing"),
+    path("detail/<str:title>", views.get_listing, name="get_listing"),
     path("<str:cat>", views.active_by_cat, name="listings_by_cat"),
 ]

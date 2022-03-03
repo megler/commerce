@@ -127,3 +127,19 @@ def create_listing(request):
             print(form.errors)
     context = {"form": form}
     return render(request, "auctions/create-listing.html", context)
+
+
+def get_listing(request, title):
+    """Returns single listing by name"""
+
+    get_id = ListAuction.objects.get(item_name=title)
+    get_cat = Category.objects.get(pk=get_id.categories_id)
+
+    return render(
+        request,
+        "auctions/detail.html",
+        {
+            "category": get_cat,
+            "item": get_id,
+        },
+    )
