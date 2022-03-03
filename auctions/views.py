@@ -8,6 +8,18 @@ from django.contrib.auth.decorators import login_required
 
 from .models import User, Category, ListAuction, Bid, Watchlist
 from auctions.forms import ListAuctionForm
+from datetime import datetime, timedelta, timezone
+import time
+
+
+def datetime_from_utc_to_local(utc_datetime):
+    """ Convert UTC to local datetime """
+
+    # Credit: https://stackoverflow.com/questions/4770297/convert-utc-datetime-string-to-local-datetime
+    now_timestamp = time.time()
+    offset = datetime.fromtimestamp(now_timestamp) - datetime.utcfromtimestamp(
+        now_timestamp)
+    return utc_datetime + offset
 
 
 def index(request):
@@ -134,11 +146,13 @@ def get_listing(request, title):
 
     get_id = ListAuction.objects.get(item_name=title)
     get_cat = Category.objects.get(pk=get_id.categories_id)
+    expire = get_id.date_created + timedelta(days=7)
 
     return render(
         request,
         "auctions/detail.html",
         {
+            "expire_date": datetime_from_utc_to_local(expire),
             "category": get_cat,
             "item": get_id,
         },

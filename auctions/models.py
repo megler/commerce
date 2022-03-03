@@ -40,7 +40,7 @@ class ListAuction(models.Model):
 
     CONDITION = (("New", "New"), ("Used", "Used"), ("Refurbished",
                                                     "Refurbished"))
-
+    date_created = models.DateTimeField(auto_now_add=True)
     item_name = models.CharField(max_length=80)
     starting_bid = models.DecimalField(decimal_places=2, max_digits=7)
     quantity = models.IntegerField()

@@ -1,5 +1,5 @@
 {% extends "auctions/layout.html" %}
-
+{% load humanize %}
 {% block body %}
   <section class="py-5">
     <div class="container px-4 px-lg-5 my-5">
@@ -11,8 +11,17 @@
           </div>
           <h1 class="display-5 fw-bolder">{{ item.item_name }}</h1>
           <div class="fs-5 mb-5">${{ item.starting_bid }}</div>
-          <div class="fs-5 mb-5">Available Quantity:
+          <div class="fs-5 mb-2">Available Quantity:
             {{ item.quantity }}</div>
+          <div class="fs-6 mb-2">Condition:
+            {{ item.item_condition }}</div>
+
+          <div class="fs-6 mb-5">Time Left:
+            {{ expire_date|naturaltime }}
+            |
+            {{ expire_date }}
+          </div>
+
           <p class="lead">{{ item.description }}</p>
           <div class="d-flex">
             <input class="form-control text-center me-3" id="inputQuantity" type="num" value="1" style="max-width: 3rem"/>
