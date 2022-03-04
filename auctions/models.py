@@ -73,7 +73,7 @@ class Bid(models.Model):
         on_delete=models.SET_NULL,
         related_name="auction_item",
     )
-    bid = models.IntegerField(null=True)
+    bid = models.DecimalField(decimal_places=2, max_digits=7)
     high_bidder = models.BooleanField(
         default=True)  # Will hold ID of high bidder
 

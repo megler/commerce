@@ -7,32 +7,33 @@
   <section class="py-5">
     <div class="container px-4 px-lg-5 mt-5">
       <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
-        {% for listing in active_listings %}
-          <div class="col mb-5">
-            <div class="card h-100">
-              <!-- Product image-->
-              <img class="card-img-top" src="{{ listing.listing_image }}" alt="{{ listing.item_name }}"/>
-              <!-- Product details-->
-              <div class="card-body p-4">
+        {% for bid in bids %}
+          {% if bid.product.status and bid.high_bidder%}
+            <div class="col mb-5">
+              <div class="card h-100">
+                <!-- Product image-->
+                <img class="card-img-top" src="{{ bid.product.listing_image }}" alt="{{ bid.product.item_name }}"/>
+                <!-- Product details-->
+                <div class="card-body p-4">
 
-                <!-- Product name-->
-                <h5 class="fw-b older text-center">{{ listing.item_name }}</h5>
-                <!-- Product Condition-->
-                <p class="card-subtitle mb-2 text-muted text-center">{{ listing.item_condition }}</p>
-                <!-- Product Description-->
-                <p class="card-text">{{ listing.description }}</p>
-                <!-- Product Bid-->
-                <p class="text-center">${{ listing.starting_bid }}</p>
-
-              </div>
-              <!-- Product actions-->
-              <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                <div class="text-center">
-                  <a class="btn btn-outline-dark mt-auto" href="{% url 'get_listing' title=listing.item_name %}">Add to cart</a>
+                  <!-- Product name-->
+                  <h5 class="fw-b older text-center">{{ bid.product.item_name }}</h5>
+                  <!-- Product Condition-->
+                  <p class="card-subtitle mb-2 text-muted text-center">{{ bid.product.item_condition }}</p>
+                  <!-- Product Description-->
+                  <p class="card-text">{{ bid.product.description }}</p>
+                  <!-- Product Bid-->
+                  <p class="card-text text-center">{{ bid.bid }}</p>
+                </div>
+                <!-- Product actions-->
+                <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                  <div class="text-center">
+                    <a class="btn btn-outline-dark mt-auto" href="{% url 'get_listing' title=bid.product.item_name %}">View Item</a>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          {% endif %}
         {% endfor %}
       </div>
     </div>

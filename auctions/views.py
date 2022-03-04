@@ -23,10 +23,13 @@ def datetime_from_utc_to_local(utc_datetime):
 
 
 def index(request):
+    bids = Bid.objects.all()
     return render(
         request,
         "auctions/index.html",
-        {"active_listings": ListAuction.objects.all()},
+        {
+            "bids": bids,
+        },
     )
 
 
@@ -164,11 +167,14 @@ def get_listing(request, title, message=""):
     get_listing_info = ListAuction.objects.get(item_name=title)
     get_cat = Category.objects.get(pk=get_listing_info.categories_id)
     expire = get_listing_info.date_created + timedelta(days=7)
+    current_bid = Bid.objects.get(product_id=get_listing_info.id,
+                                  high_bidder=True)
 
     return render(
         request,
         "auctions/detail.html",
         {
+            "current_bid": current_bid.bid,
             "expire_date": datetime_from_utc_to_local(expire),
             "category": get_cat,
             "item": get_listing_info,
@@ -180,7 +186,7 @@ def get_listing(request, title, message=""):
 def bid_item(request, title):
     get_listing_info = ListAuction.objects.get(item_name=title)
     get_bid = (Bid.objects.filter(
-        product_id=get_listing_info.id).order_by("bid")[:1].get())
+        product_id=get_listing_info.id).order_by("-bid")[:1].get())
 
     if request.method == "POST":
         if not request.user.is_authenticated:
@@ -189,14 +195,16 @@ def bid_item(request, title):
                                message="You need to be logged in to bid.")
         if request.user.is_authenticated and get_listing_info.status:
             bid_amt = float(request.POST["bid-amt"])
-            if bid_amt < get_listing_info.starting_bid:
+            if (bid_amt < get_listing_info.starting_bid
+                    and get_bid.bid == get_listing_info.starting_bid):
                 return get_listing(
                     request,
                     title=title,
                     message=
                     "Your bid needs to be equal to or higher than the starting bid.",
                 )
-            if bid_amt < get_bid.bid:
+
+            if bid_amt <= get_bid.bid:
                 return get_listing(
                     request,
                     title=title,
@@ -213,5 +221,10 @@ def bid_item(request, title):
                         product_id=get_listing_info.id,
                         high_bidder=True,
                     )
+                return get_listing(
+                    request,
+                    title=title,
+                    message="You are now the highest bidder!",
+                )
 
     return get_listing(request, title=title)
