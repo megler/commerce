@@ -1,6 +1,6 @@
 from unicodedata import category
 from django.contrib.auth import authenticate, login, logout
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -132,10 +132,24 @@ def create_listing(request):
 
     if request.method == "POST":
         form = ListAuctionForm(request.POST, user=request.user)
+
         if form.is_valid():
             obj = form.save(commit=False)
             obj.seller = User.objects.get(pk=request.user.id)
             obj.save()
+            with transaction.atomic():
+                product_id = ListAuction.objects.get(
+                    item_name=form.cleaned_data["item_name"]).id
+                bid = ListAuction.objects.get(
+                    starting_bid=form.cleaned_data["starting_bid"]
+                ).starting_bid
+                new_bid = Bid(
+                    bid=bid,
+                    customer_id=request.user.id,
+                    product_id=product_id,
+                    high_bidder=True,
+                )
+                new_bid.save()
             return HttpResponseRedirect(reverse("index"))
         else:
             return render(request, "auctions/create-listing.html",
@@ -150,8 +164,6 @@ def get_listing(request, title, message=""):
     get_listing_info = ListAuction.objects.get(item_name=title)
     get_cat = Category.objects.get(pk=get_listing_info.categories_id)
     expire = get_listing_info.date_created + timedelta(days=7)
-    increment_bid = get_listing_info.starting_bid + 1
-    print(increment_bid)
 
     return render(
         request,
@@ -160,7 +172,6 @@ def get_listing(request, title, message=""):
             "expire_date": datetime_from_utc_to_local(expire),
             "category": get_cat,
             "item": get_listing_info,
-            "increment_bid": increment_bid,
             "message": message,
         },
     )
@@ -168,11 +179,39 @@ def get_listing(request, title, message=""):
 
 def bid_item(request, title):
     get_listing_info = ListAuction.objects.get(item_name=title)
+    get_bid = Bid.objects.all().filter(product_id=get_listing_info.id)
+    high_bid = Bid.objects.latest("bid")
     if request.method == "POST":
-        if request.user.is_authenticated and get_listing_info.status:
-            bid_amt = request.POST["bid-amt"]
         if not request.user.is_authenticated:
             return get_listing(request,
                                title=title,
                                message="You need to be logged in to bid.")
+        if request.user.is_authenticated and get_listing_info.status:
+            bid_amt = float(request.POST["bid-amt"])
+            if bid_amt < get_listing_info.starting_bid:
+                return get_listing(
+                    request,
+                    title=title,
+                    message=
+                    "Your bid needs to be equal to or higher than the starting bid.",
+                )
+            if bid_amt < high_bid:
+                return get_listing(
+                    request,
+                    title=title,
+                    message=
+                    "Your bid needs to be greater than the current high bid.",
+                )
+            else:
+                high_bid.high_bidder = False
+                high_bid.save()
+
+                new_bid = Bid(
+                    bid=bid_amt,
+                    customer_id=User.id,
+                    product_id=get_listing_info.id,
+                    high_bidder=True,
+                )
+                new_bid.save()
+
     return get_listing(request, title=title)

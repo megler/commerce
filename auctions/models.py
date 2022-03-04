@@ -74,7 +74,11 @@ class Bid(models.Model):
         related_name="auction_item",
     )
     bid = models.IntegerField(null=True)
-    high_bidder = models.IntegerField(null=True)  # Will hold ID of high bidder
+    high_bidder = models.BooleanField(
+        default=True)  # Will hold ID of high bidder
+
+    def __str__(self):
+        return f"Item Bid: {self.product.item_name}"
 
 
 class Watchlist(models.Model):
