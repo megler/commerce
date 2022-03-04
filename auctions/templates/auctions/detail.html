@@ -36,16 +36,20 @@
               <div>{{ message }}</div>
             {% endif %}
           </div>
-          <form action="{% url 'bid_item' title=item.item_name %}" method="post">
-            <div class="d-flex flex-row">
-              {% csrf_token %}
-              <input type="textbox" class="form-control text-center me-3" id="currency-field" placeholder="Bid Amount" name="bid-amt"/>
-              <button class="btn btn-outline-dark flex-shrink-0" type="submit">
-                <i class="bi-cart-fill me-1"></i>
-                Bid Now
-              </button>
-            </div>
-          </form>
+          {% if item.status %}
+            <form action="{% url 'bid_item' title=item.item_name %}" method="post">
+              <div class="d-flex flex-row">
+                {% csrf_token %}
+                <input type="textbox" class="form-control text-center me-3" id="currency-field" placeholder="Bid Amount" name="bid-amt"/>
+                <button class="btn btn-outline-dark flex-shrink-0" type="submit">
+                  <i class="bi-cart-fill me-1"></i>
+                  Bid Now
+                </button>
+              </div>
+            </form>
+          {% else %}
+            <p class="text-danger">Sorry, this auction is no longer active.</p>
+          {% endif %}
 
           <div class="small mt-4">
             <a href="#">Add To Watchlist</a>
