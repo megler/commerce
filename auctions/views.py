@@ -179,8 +179,9 @@ def get_listing(request, title, message=""):
 
 def bid_item(request, title):
     get_listing_info = ListAuction.objects.get(item_name=title)
-    get_bid = Bid.objects.all().filter(product_id=get_listing_info.id)
-    high_bid = Bid.objects.latest("bid")
+    get_bid = (Bid.objects.filter(
+        product_id=get_listing_info.id).order_by("bid")[:1].get())
+
     if request.method == "POST":
         if not request.user.is_authenticated:
             return get_listing(request,
@@ -195,7 +196,7 @@ def bid_item(request, title):
                     message=
                     "Your bid needs to be equal to or higher than the starting bid.",
                 )
-            if bid_amt < high_bid:
+            if bid_amt < get_bid.bid:
                 return get_listing(
                     request,
                     title=title,
@@ -203,15 +204,14 @@ def bid_item(request, title):
                     "Your bid needs to be greater than the current high bid.",
                 )
             else:
-                high_bid.high_bidder = False
-                high_bid.save()
-
-                new_bid = Bid(
-                    bid=bid_amt,
-                    customer_id=User.id,
-                    product_id=get_listing_info.id,
-                    high_bidder=True,
-                )
-                new_bid.save()
+                get_bid.high_bidder = False
+                get_bid.save()
+                with transaction.atomic():
+                    Bid.objects.create(
+                        bid=bid_amt,
+                        customer_id=request.user.id,
+                        product_id=get_listing_info.id,
+                        high_bidder=True,
+                    )
 
     return get_listing(request, title=title)
