@@ -1,5 +1,6 @@
 {% extends "auctions/layout.html" %}
 {% load humanize %}
+
 {% block title %}
   Accio Auctions -
   {{ item.item_name }}
@@ -14,7 +15,6 @@
             <a href="{% url 'listings_by_cat' cat=category %}">{{ category }}</a>
           </div>
           <h1 class="display-5 fw-bolder">{{ item.item_name }}</h1>
-          <div class="fs-5 mb-5">${{ item.starting_bid }}</div>
           <div class="fs-5 mb-2">Available Quantity:
             {{ item.quantity }}</div>
           <div class="fs-6 mb-2">Condition:
@@ -27,13 +27,26 @@
           </div>
 
           <p class="lead">{{ item.description }}</p>
-          <div class="d-flex">
-            <input class="form-control text-center me-3" id="inputQuantity" type="num" value="1" style="max-width: 3rem"/>
-            <button class="btn btn-outline-dark flex-shrink-0" type="button">
-              <i class="bi-cart-fill me-1"></i>
-              Bid Now
-            </button>
+          <div class="fs-5 ">Current Bid: ${{ item.starting_bid }}
+            USD</div>
+          <div class="fs-7 mb-2 text-muted">Enter: ${{ increment_bid }}
+            or more.</div>
+          <div class="mb-3 text-danger">
+            {% if message %}
+              <div>{{ message }}</div>
+            {% endif %}
           </div>
+          <form action="{% url 'bid_item' title=item.item_name %}" method="post">
+            <div class="d-flex flex-row">
+              {% csrf_token %}
+              <input type="textbox" class="form-control text-center me-3" id="currency-field" placeholder="Bid Amount" name="bid-amt"/>
+              <button class="btn btn-outline-dark flex-shrink-0" type="submit">
+                <i class="bi-cart-fill me-1"></i>
+                Bid Now
+              </button>
+            </div>
+          </form>
+
           <div class="small mt-4">
             <a href="#">Add To Watchlist</a>
           </div>

@@ -11,7 +11,7 @@ class User(AbstractUser):
                                          related_name="auctions")
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.username}"
 
 
 class Category(models.Model):
@@ -53,6 +53,8 @@ class ListAuction(models.Model):
                                    on_delete=models.SET_NULL,
                                    related_name="categories")
     listing_image = models.URLField(null=True)
+    # status True is Active. False is Inactive
+    status = models.BooleanField(default=True)
 
     def __str__(self):
         return f"Item: {self.item_name}"

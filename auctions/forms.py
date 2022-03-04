@@ -1,5 +1,5 @@
 from django.forms import ModelForm
-from .models import ListAuction
+from .models import ListAuction, Bid
 
 
 class ListAuctionForm(ModelForm):

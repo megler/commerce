@@ -10,3 +10,11 @@
 .center-form {
     margin: 0 auto;
 }
+
+#currency-field {
+    max-width: 8rem
+}
+
+input#currency-field:focus::placeholder {
+    color: transparent;
+  }

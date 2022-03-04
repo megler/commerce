@@ -138,18 +138,20 @@ def create_listing(request):
             obj.save()
             return HttpResponseRedirect(reverse("index"))
         else:
-            print("ERROR : Form is invalid")
-            print(form.errors)
+            return render(request, "auctions/create-listing.html",
+                          {"message": form.errors})
     context = {"form": form}
     return render(request, "auctions/create-listing.html", context)
 
 
-def get_listing(request, title):
+def get_listing(request, title, message=""):
     """Returns single listing by name"""
 
-    get_listing = ListAuction.objects.get(item_name=title)
-    get_cat = Category.objects.get(pk=get_listing.categories_id)
-    expire = get_listing.date_created + timedelta(days=7)
+    get_listing_info = ListAuction.objects.get(item_name=title)
+    get_cat = Category.objects.get(pk=get_listing_info.categories_id)
+    expire = get_listing_info.date_created + timedelta(days=7)
+    increment_bid = get_listing_info.starting_bid + 1
+    print(increment_bid)
 
     return render(
         request,
@@ -157,6 +159,20 @@ def get_listing(request, title):
         {
             "expire_date": datetime_from_utc_to_local(expire),
             "category": get_cat,
-            "item": get_listing,
+            "item": get_listing_info,
+            "increment_bid": increment_bid,
+            "message": message,
         },
     )
+
+
+def bid_item(request, title):
+    get_listing_info = ListAuction.objects.get(item_name=title)
+    if request.method == "POST":
+        if request.user.is_authenticated and get_listing_info.status:
+            bid_amt = request.POST["bid-amt"]
+        if not request.user.is_authenticated:
+            return get_listing(request,
+                               title=title,
+                               message="You need to be logged in to bid.")
+    return get_listing(request, title=title)
