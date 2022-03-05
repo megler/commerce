@@ -113,14 +113,16 @@ def active_by_cat(request, cat):
 
     get_cat = Category.objects.filter(cat_name=cat).values_list("id",
                                                                 flat=True)
+    listings = ListAuction.objects.all().filter(categories__in=get_cat)
+    current_bid = Bid.objects.all().filter(product__in=listings,
+                                           high_bidder=True)
 
     return render(
         request,
         "auctions/listings-by-cat.html",
         {
             "category": cat,
-            "listings":
-            ListAuction.objects.all().filter(categories__in=get_cat),
+            "listings_with_bid": current_bid,
         },
     )
 
