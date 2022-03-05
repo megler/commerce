@@ -12,7 +12,7 @@
           {# Loop through category table for list of categories #}
           {% for category in categories %}
             <div class="col-lg-6 col-md-4 col-sm-3 col-xs-2 ">
-              <a href="{{ category }}">{{ category }}</a>
+              <a href="{% url 'listings_by_cat' cat=category %}">{{ category }}</a>
             </div>
           {% endfor %}
         </div>
