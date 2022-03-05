@@ -181,6 +181,7 @@ def get_listing(request, title, message=""):
         request,
         "auctions/detail.html",
         {
+            "high_bidder": current_bid.customer_id,
             "current_bid": current_bid.bid,
             "expire_date": datetime_from_utc_to_local(expire),
             "category": get_cat,
@@ -189,6 +190,15 @@ def get_listing(request, title, message=""):
             "verify_watchlist": list_id,
         },
     )
+
+
+@login_required(login_url="login")
+def end_auction(request, id=None):
+    """ Allow the user who signed in and is the one who created the listing to end the auction early. """
+    listing = ListAuction.objects.get(id=id)
+    listing.status = False
+    listing.save()
+    return get_listing(request, title=listing.item_name)
 
 
 def bid_item(request, title):

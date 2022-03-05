@@ -24,4 +24,5 @@ urlpatterns = [
     path("add_to_watchlist/<str:title>",
          views.add_to_watchlist,
          name="add_to_watchlist"),
+    path("end_auction/<int:id>", views.end_auction, name="end_auction"),
 ]

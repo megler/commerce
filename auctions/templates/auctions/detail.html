@@ -19,7 +19,6 @@
             {{ item.quantity }}</div>
           <div class="fs-6 mb-2">Condition:
             {{ item.item_condition }}</div>
-
           <div class="fs-6 mb-5">Time Left:
             {{ expire_date|naturaltime }}
             |
@@ -48,6 +47,12 @@
           {% else %}
             <p class="text-danger">Sorry, this auction is no longer active.</p>
           {% endif %}
+          <div class="fs-6 mb-2">
+            {% if request.user.is_authenticated and high_bidder == user.id and not item.status%}
+              <p class="text-success">Congratulations! You are the winner!</p>
+              <p class="text-success">The seller will contact you shortly for shipping instructions.</p>
+            {% endif %}
+          </div>
 
           {% if request.user.is_authenticated %}
             {% if item.id in verify_watchlist %}
@@ -64,6 +69,11 @@
             {% endif %}
           {% endif %}
 
+          {% if request.user.is_authenticated and item.seller_id == user.id %}
+            <div class="mt-3">
+              <a class="text-danger" href="{% url 'end_auction' id=item.id %}">End Auction</a>
+            </div>
+          {% endif %}
         </div>
       </div>
     </div>
