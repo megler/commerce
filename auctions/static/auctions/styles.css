@@ -18,3 +18,10 @@
 input#currency-field:focus::placeholder {
     color: transparent;
   }
+
+/* Make card top images square */
+.card-img-top {
+    width: 100%;
+    height: 15vw;
+    object-fit: cover;
+}

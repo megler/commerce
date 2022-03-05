@@ -204,7 +204,7 @@ def bid_item(request, title):
                     "Your bid needs to be equal to or higher than the starting bid.",
                 )
 
-            if bid_amt <= get_bid.bid:
+            if bid_amt <= get_bid.bid and get_bid.bid > get_listing_info.starting_bid:
                 return get_listing(
                     request,
                     title=title,
