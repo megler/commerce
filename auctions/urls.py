@@ -15,4 +15,8 @@ urlpatterns = [
     path("listings-by-cat/<str:cat>",
          views.active_by_cat,
          name="listings_by_cat"),
+    path("watchlist", views.show_watchlist, name="show_watchlist"),
+    path("add_to_watchlist/<str:title>",
+         views.add_to_watchlist,
+         name="add_to_watchlist"),
 ]

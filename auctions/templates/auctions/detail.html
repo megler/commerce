@@ -48,10 +48,14 @@
           {% else %}
             <p class="text-danger">Sorry, this auction is no longer active.</p>
           {% endif %}
-
-          <div class="small mt-4">
-            <a href="#">Add To Watchlist</a>
-          </div>
+          {% if request.user.is_authenticated %}
+            <form action="{% url 'add_to_watchlist' title=item.item_name %}" method="post">
+              {% csrf_token %}
+              <div class="small mt-4">
+                <button class="btn btn-outline-dark mb-3" type="submit">Add to Watchlist</button>
+              </div>
+            </form>
+          {% endif %}
         </div>
       </div>
     </div>

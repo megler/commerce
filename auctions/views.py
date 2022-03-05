@@ -5,7 +5,6 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-
 from .models import User, Category, ListAuction, Bid, Watchlist
 from auctions.forms import ListAuctionForm
 from datetime import datetime, timedelta, timezone
@@ -230,3 +229,31 @@ def bid_item(request, title):
                 )
 
     return get_listing(request, title=title)
+
+
+def add_to_watchlist(request, title):
+    get_listing_info = ListAuction.objects.get(item_name=title)
+    if request.method == "POST":
+        if request.user.is_authenticated:
+            p = Watchlist(buyer_id=request.user.id,
+                          product_id=get_listing_info.id)
+            p.save()
+
+            return get_listing(
+                request,
+                title=title,
+                message="Item added to watchlist.",
+            )
+        else:
+            return get_listing(
+                request,
+                title=title,
+                message="You must be logged in to have a watchlist.",
+            )
+    return get_listing(request, title=title)
+
+
+def show_watchlist(request):
+    items = Watchlist.objects.all().filter(buyer=request.user.id)
+
+    return render(request, "auctions/watchlist.html", {"watch_items": items})

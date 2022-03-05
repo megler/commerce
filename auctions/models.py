@@ -95,3 +95,6 @@ class Watchlist(models.Model):
         on_delete=models.SET_NULL,
         related_name="item_to_watch",
     )
+
+    def __str__(self):
+        return f"User: {self.buyer.username}"
