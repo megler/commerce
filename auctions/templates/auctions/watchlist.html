@@ -7,7 +7,7 @@
   <section class="py-5">
     <div class="container px-4 px-lg-5 mt-5">
       <div class="col-12">
-        <h2>Active Listings for
+        <h2>Watchlist for
           {% if user.get_short_name %}
             {{ user.get_short_name }}</h2>
         {% else %}
@@ -15,35 +15,41 @@
       {% endif %}
     </div>
     <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4">
-      {% for cat in listings_with_bid %}
-        {% if cat.product.status and cat.high_bidder%}
+      {% if not watch_items %}
+        <p>your list is empty</p>
+      {% else %}
+        {% for item in watch_items %}
+
           <div class="col mb-5">
             <div class="card h-100">
               <!-- Product image-->
-              <img class="card-img-top" src="{{ cat.product.listing_image }}" alt="{{ cat.product.item_name }}"/>
+              <img class="card-img-top card-img-top-home" src="{{ item.product.listing_image }}" alt="{{ item.product.item_name }}"/>
               <!-- Product details-->
               <div class="card-body p-4">
 
                 <!-- Product name-->
-                <h5 class="fw-b older text-center">{{ cat.product.item_name }}</h5>
+                <h5 class="fw-b older text-center">{{ item.product.item_name }}</h5>
                 <!-- Product Condition-->
-                <p class="card-subtitle mb-2 text-muted text-center">{{ cat.product.item_condition }}</p>
-                <!-- Product Description-->
-                <p class="card-text">{{ cat.product.description }}</p>
-                <!-- Product Bid-->
-                <p class="text-center">${{ cat.bid }}</p>
-
+                <p class="card-subtitle mb-2 text-muted text-center">{{ item.product.item_condition }}</p>
+                {% if item.bids.high_bidder%}
+                  <!-- Product Bid-->
+                  <p class="text-center">Current Bid ${{ item.bids.bid }}</p>
+                {% endif %}
               </div>
               <!-- Product actions-->
               <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
                 <div class="text-center">
-                  <a class="btn btn-outline-dark mt-auto" href="{% url 'get_listing' title=cat.product.item_name %}">View Listing</a>
+                  <a class="btn btn-outline-dark mt-auto" href="{% url 'get_listing' title=item.product.item_name %}">View Listing</a>
+                </div>
+                <div class="text-center mt-3">
+                  <a class="text-danger" href="{% url 'delete_from_watchlist' id=item.id %}">Delete From Watchlist</a>
                 </div>
               </div>
             </div>
           </div>
-        {% endif %}
-      {% endfor %}
+
+        {% endfor %}
+      {% endif %}
     </div>
   </div>
 </section>

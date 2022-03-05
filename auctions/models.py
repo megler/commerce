@@ -96,5 +96,12 @@ class Watchlist(models.Model):
         related_name="item_to_watch",
     )
 
+    bids = models.ForeignKey(
+        Bid,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="bids",
+    )
+
     def __str__(self):
         return f"User: {self.buyer.username}"

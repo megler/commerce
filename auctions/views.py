@@ -171,6 +171,12 @@ def get_listing(request, title, message=""):
     current_bid = Bid.objects.get(product_id=get_listing_info.id,
                                   high_bidder=True)
 
+    # Get all items from user's watchlist so you can extract specific prod id's
+    verify_watchlist = Watchlist.objects.filter(buyer_id=request.user.id)
+    # Get product id's from logged in user's watchlist
+    # Credit: https://stackoverflow.com/questions/7054189/checking-if-something-exists-in-items-of-list-variable-in-django-template
+    list_id = [i.product_id for i in verify_watchlist]
+
     return render(
         request,
         "auctions/detail.html",
@@ -180,6 +186,7 @@ def get_listing(request, title, message=""):
             "category": get_cat,
             "item": get_listing_info,
             "message": message,
+            "verify_watchlist": list_id,
         },
     )
 
@@ -233,10 +240,14 @@ def bid_item(request, title):
 
 def add_to_watchlist(request, title):
     get_listing_info = ListAuction.objects.get(item_name=title)
+    get_bid = Bid.objects.get(product_id=get_listing_info.id, high_bidder=True)
     if request.method == "POST":
         if request.user.is_authenticated:
-            p = Watchlist(buyer_id=request.user.id,
-                          product_id=get_listing_info.id)
+            p = Watchlist(
+                buyer_id=request.user.id,
+                product_id=get_listing_info.id,
+                bids_id=get_bid.id,
+            )
             p.save()
 
             return get_listing(
@@ -253,7 +264,19 @@ def add_to_watchlist(request, title):
     return get_listing(request, title=title)
 
 
+@login_required(login_url="login")
+def delete_from_watchlist(request, id=None):
+    """ Allow logged in user to remove item from watchlist"""
+
+    # Credit: https://stackoverflow.com/questions/44248228/django-how-to-delete-a-object-directly-from-a-button-in-a-table
+    object = Watchlist.objects.get(id=id)
+    object.delete()
+    return show_watchlist(request)
+
+
+@login_required(login_url="login")
 def show_watchlist(request):
+    """ Show logged in user all items in watchlist """
     items = Watchlist.objects.all().filter(buyer=request.user.id)
 
     return render(request, "auctions/watchlist.html", {"watch_items": items})
