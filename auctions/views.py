@@ -1,3 +1,11 @@
+# CSCI E-33a - Commerce
+#
+# Assignment 2 - Commerce
+# Usage:
+#      A Django based auction application.
+#
+# Marceia Egler March 6, 2022
+
 from unicodedata import category
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError, transaction
