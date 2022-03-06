@@ -2,23 +2,13 @@ from unicodedata import category
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError, transaction
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .models import User, Category, ListAuction, Bid, Watchlist, Comment
 from auctions.forms import ListAuctionForm
-from datetime import datetime, timedelta, timezone
-import time
-
-
-def datetime_from_utc_to_local(utc_datetime):
-    """ Convert UTC to local datetime """
-
-    # Credit: https://stackoverflow.com/questions/4770297/convert-utc-datetime-string-to-local-datetime
-    now_timestamp = time.time()
-    offset = datetime.fromtimestamp(now_timestamp) - datetime.utcfromtimestamp(
-        now_timestamp)
-    return utc_datetime + offset
+from datetime import datetime, timedelta
+from . import util
 
 
 def index(request):
@@ -132,16 +122,21 @@ def create_listing(request):
 
     # Credit: https://forum.djangoproject.com/t/automatically-get-user-id-to-assignate-to-form-when-submitting/5333/6
 
+    # MSG-TO-TA - I don't know why this needs to be here twice, but the form
+    # renders incorrectly if you don't.
+
     form = ListAuctionForm(user=request.user)
 
     if request.method == "POST":
         form = ListAuctionForm(request.POST, user=request.user)
 
         if form.is_valid():
+            # Save form submission
             obj = form.save(commit=False)
             obj.seller = User.objects.get(pk=request.user.id)
             obj.save()
             with transaction.atomic():
+                # Also push starting bid to bid table
                 product_id = ListAuction.objects.get(
                     item_name=form.cleaned_data["item_name"]).id
                 bid = ListAuction.objects.get(
@@ -184,7 +179,7 @@ def get_listing(request, title, message=""):
         {
             "high_bidder": current_bid.customer_id,
             "current_bid": current_bid.bid,
-            "expire_date": datetime_from_utc_to_local(expire),
+            "expire_date": util.datetime_from_utc_to_local(expire),
             "category": get_cat,
             "item": get_listing_info,
             "message": message,
@@ -200,10 +195,12 @@ def end_auction(request, id=None):
     listing = ListAuction.objects.get(id=id)
     listing.status = False
     listing.save()
-    return get_listing(request, title=listing.item_name)
+    # Credit: https://stackoverflow.com/questions/2005822/django-forms-reload-view-after-post
+    return redirect(request.META["HTTP_REFERER"])
 
 
 def bid_item(request, title):
+    """ Logged in user can bid on an item """
     get_listing_info = ListAuction.objects.get(item_name=title)
     get_bid = (Bid.objects.filter(
         product_id=get_listing_info.id).order_by("-bid")[:1].get())
@@ -223,7 +220,6 @@ def bid_item(request, title):
                     message=
                     "Your bid needs to be equal to or higher than the starting bid.",
                 )
-
             if bid_amt <= get_bid.bid and get_bid.bid > get_listing_info.starting_bid:
                 return get_listing(
                     request,
@@ -232,6 +228,7 @@ def bid_item(request, title):
                     "Your bid needs to be greater than the current high bid.",
                 )
             else:
+                # remove current high bidder and add new high bidder
                 get_bid.high_bidder = False
                 get_bid.save()
                 with transaction.atomic():
@@ -247,7 +244,7 @@ def bid_item(request, title):
                     message="You are now the highest bidder!",
                 )
 
-    return get_listing(request, title=title)
+    return redirect(request.META["HTTP_REFERER"])
 
 
 def add_to_watchlist(request, title):
@@ -273,7 +270,7 @@ def add_to_watchlist(request, title):
                 title=title,
                 message="You must be logged in to have a watchlist.",
             )
-    return get_listing(request, title=title)
+    return redirect(request.META["HTTP_REFERER"])
 
 
 @login_required(login_url="login")
@@ -283,7 +280,7 @@ def delete_from_watchlist(request, id=None):
     # Credit: https://stackoverflow.com/questions/44248228/django-how-to-delete-a-object-directly-from-a-button-in-a-table
     object = Watchlist.objects.get(id=id)
     object.delete()
-    return show_watchlist(request)
+    return redirect(request.META["HTTP_REFERER"])
 
 
 @login_required(login_url="login")
@@ -312,4 +309,4 @@ def add_comment(request, title, message=""):
                 title=title,
                 message="Comment Added",
             )
-    return get_listing(request, title=title)
+    return redirect(request.META["HTTP_REFERER"])

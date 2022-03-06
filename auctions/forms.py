@@ -1,4 +1,4 @@
-from django.forms import ModelForm
+from django.forms import ModelForm, Textarea
 from .models import ListAuction, Bid
 
 
@@ -15,6 +15,9 @@ class ListAuctionForm(ModelForm):
             "categories",
             "listing_image",
         ]
+        widgets = {
+            "description": Textarea(attrs={"rows": 5}),
+        }
 
     # Credit: https://stackoverflow.com/questions/16205908/django-modelform-not-required-field
     def __init__(self, *args, **kwargs):
