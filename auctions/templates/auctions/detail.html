@@ -8,7 +8,13 @@
   <section class="py-5">
     <div class="container px-4 px-lg-5 my-5">
       <div class="row gx-4 gx-lg-5 align-items-center">
-        <div class="col-md-6"><img class="card-img-top mb-5 mb-md-0" src="{{ item.listing_image }}" alt="{{item.item_name}}"/></div>
+        <div class="col-md-6">
+          {% if item.listing_image %}
+            <img class="card-img-top mb-5 mb-md-0" src="{{ item.listing_image }}" alt="{{item.item_name}}"/>
+          {% else %}
+            <img class="card-img-top mb-5 mb-md-0" src="../static/auctions/images/Light-Harry-Potter-Background.jpg" alt="{{ cat.product.item_name }} placeholder image"/>
+          {% endif %}
+        </div>
         <div class="col-md-6">
           <div class="small mb-1">Category:
             <a href="{% url 'listings_by_cat' cat=category %}">{{ category }}</a>

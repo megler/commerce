@@ -41,11 +41,14 @@ class ListAuction(models.Model):
     item_condition = models.CharField(max_length=30,
                                       choices=CONDITION,
                                       default="New")
-    categories = models.ForeignKey(Category,
-                                   null=True,
-                                   on_delete=models.SET_NULL,
-                                   related_name="categories")
-    listing_image = models.URLField(null=True)
+    categories = models.ForeignKey(
+        Category,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="categories",
+    )
+    listing_image = models.URLField(null=True, blank=True)
     # status True is Active. False is Inactive
     status = models.BooleanField(default=True)
 

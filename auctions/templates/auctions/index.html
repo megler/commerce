@@ -12,7 +12,12 @@
             <div class="col mb-5">
               <div class="card h-100">
                 <!-- Product image-->
-                <img class="card-img-top card-img-top-home" src="{{ bid.product.listing_image }}" alt="{{ bid.product.item_name }}"/>
+                {% if bid.product.listing_image %}
+                  <img class="card-img-top card-img-top-home" src="{{ bid.product.listing_image }}" alt="{{ bid.product.item_name }}"/>
+                {% else %}
+                  <img class="card-img-top card-img-top-home" src="../static/auctions/images/Light-Harry-Potter-Background.jpg" alt="{{ cat.product.item_name }} placeholder image"/>
+                {% endif %}
+
                 <!-- Product details-->
                 <div class="card-body p-4">
 
