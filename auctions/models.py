@@ -104,4 +104,23 @@ class Watchlist(models.Model):
     )
 
     def __str__(self):
-        return f"User: {self.buyer.username}"
+        return f"User: {self.buyer.username} | Item: {self.product.item_name}"
+
+
+class Comment(models.Model):
+    user = models.ForeignKey(User,
+                             null=True,
+                             on_delete=models.SET_NULL,
+                             related_name="commenter")
+
+    product = models.ForeignKey(
+        ListAuction,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="item_to_comment",
+    )
+
+    comment = models.CharField(max_length=500000)
+
+    def __str__(self):
+        return f"Comment by User: {self.user.username} | Item: {self.product.item_name}"

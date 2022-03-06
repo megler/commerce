@@ -25,4 +25,5 @@ urlpatterns = [
          views.add_to_watchlist,
          name="add_to_watchlist"),
     path("end_auction/<int:id>", views.end_auction, name="end_auction"),
+    path("add_comment/<str:title>", views.add_comment, name="add_comment"),
 ]

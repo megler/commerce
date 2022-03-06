@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from .models import User, Category, ListAuction, Bid, Watchlist
+from .models import User, Category, ListAuction, Bid, Watchlist, Comment
 from auctions.forms import ListAuctionForm
 from datetime import datetime, timedelta, timezone
 import time
@@ -170,6 +170,7 @@ def get_listing(request, title, message=""):
     expire = get_listing_info.date_created + timedelta(days=7)
     current_bid = Bid.objects.get(product_id=get_listing_info.id,
                                   high_bidder=True)
+    get_comments = Comment.objects.all().filter(product=get_listing_info.id)
 
     # Get all items from user's watchlist so you can extract specific prod id's
     verify_watchlist = Watchlist.objects.filter(buyer_id=request.user.id)
@@ -188,6 +189,7 @@ def get_listing(request, title, message=""):
             "item": get_listing_info,
             "message": message,
             "verify_watchlist": list_id,
+            "comments": get_comments,
         },
     )
 
@@ -290,3 +292,24 @@ def show_watchlist(request):
     items = Watchlist.objects.all().filter(buyer=request.user.id)
 
     return render(request, "auctions/watchlist.html", {"watch_items": items})
+
+
+def add_comment(request, title, message=""):
+    """ Logged in user can add comments to an auction item. """
+    get_listing_info = ListAuction.objects.get(item_name=title)
+    if request.method == "POST":
+        comment = request.POST["comment"]
+        if request.user.is_authenticated:
+            p = Comment(
+                user_id=request.user.id,
+                product_id=get_listing_info.id,
+                comment=comment,
+            )
+            p.save()
+
+            return get_listing(
+                request,
+                title=title,
+                message="Comment Added",
+            )
+    return get_listing(request, title=title)
