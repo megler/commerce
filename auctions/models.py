@@ -2,7 +2,6 @@ from itertools import product
 from tkinter import CASCADE
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.forms import CharField, IntegerField, DecimalField
 
 
 class User(AbstractUser):
@@ -18,14 +17,7 @@ class User(AbstractUser):
 class Category(models.Model):
     """Returns auction categories"""
 
-    AUCTION_CATEGORIES = (("Brooms", "Brooms"), ("Wands", "Wands"), ("Capes",
-                                                                     "Capes"))
-    cat_name = models.CharField(max_length=50,
-                                choices=AUCTION_CATEGORIES,
-                                default="Brooms")
-
-    categorylist = models.ManyToManyField("ListAuction",
-                                          related_name="auction_categories")
+    cat_name = models.CharField(max_length=64, null=True)
 
     def __str__(self):
         return f"{self.cat_name}"
