@@ -6,16 +6,16 @@
 #
 # Marceia Egler March 6, 2022
 
-from unicodedata import category
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.db import IntegrityError, transaction
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.contrib.auth.decorators import login_required
 from .models import User, Category, ListAuction, Bid, Watchlist, Comment
 from auctions.forms import ListAuctionForm
-from datetime import datetime, timedelta
+from datetime import timedelta
 from . import util
 
 
@@ -44,11 +44,11 @@ def login_view(request):
             login(request, user)
             return HttpResponseRedirect(reverse("index"))
         else:
-            return render(
+            messages.error(
                 request,
-                "auctions/login.html",
-                {"message": "Invalid username and/or password."},
+                "Invalid username and/or password.",
             )
+            return render(request, "auctions/login.html")
     else:
         return render(request, "auctions/login.html")
 
@@ -67,18 +67,24 @@ def register(request):
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
         if password != confirmation:
-            return render(request, "auctions/register.html",
-                          {"message": "Passwords must match."})
+            messages.error(
+                request,
+                "Passwords must match.",
+            )
+            return render(request, "auctions/register.html")
 
         # Attempt to create new user
         try:
             user = User.objects.create_user(username, email, password)
             user.save()
         except IntegrityError:
+            messages.error(
+                request,
+                "Username already taken.",
+            )
             return render(
                 request,
                 "auctions/register.html",
-                {"message": "Username already taken."},
             )
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
@@ -215,25 +221,28 @@ def bid_item(request, title):
 
     if request.method == "POST":
         if not request.user.is_authenticated:
-            return get_listing(request,
-                               title=title,
-                               message="You need to be logged in to bid.")
+            messages.error(request, "You need to be logged in to bid.")
+            return get_listing(
+                request,
+                title=title,
+            )
         if request.user.is_authenticated and get_listing_info.status:
             bid_amt = float(request.POST["bid-amt"])
             if (bid_amt < get_listing_info.starting_bid
                     and get_bid.bid == get_listing_info.starting_bid):
-                return get_listing(
+                messages.error(
                     request,
-                    title=title,
-                    message=
                     "Your bid needs to be equal to or higher than the starting bid.",
                 )
+                return get_listing(request, title=title)
             if bid_amt <= get_bid.bid and get_bid.bid > get_listing_info.starting_bid:
+                messages.error(
+                    request,
+                    "Your bid needs to be greater than the current high bid.",
+                )
                 return get_listing(
                     request,
                     title=title,
-                    message=
-                    "Your bid needs to be greater than the current high bid.",
                 )
             else:
                 # remove current high bidder and add new high bidder
@@ -246,11 +255,11 @@ def bid_item(request, title):
                         product_id=get_listing_info.id,
                         high_bidder=True,
                     )
-                return get_listing(
+                messages.success(
                     request,
-                    title=title,
-                    message="You are now the highest bidder!",
+                    "You are now the highest bidder!",
                 )
+                return get_listing(request, title=title)
 
     return redirect(request.META["HTTP_REFERER"])
 
@@ -266,18 +275,17 @@ def add_to_watchlist(request, title):
                 bids_id=get_bid.id,
             )
             p.save()
-
-            return get_listing(
+            messages.success(
                 request,
-                title=title,
-                message="Item added to watchlist.",
+                "Item added to watchlist.",
             )
+            return get_listing(request, title=title)
         else:
-            return get_listing(
+            messages.error(
                 request,
-                title=title,
-                message="You must be logged in to have a watchlist.",
+                "You must be logged in to have a watchlist.",
             )
+            return get_listing(request, title=title)
     return redirect(request.META["HTTP_REFERER"])
 
 
@@ -311,10 +319,5 @@ def add_comment(request, title, message=""):
                 comment=comment,
             )
             p.save()
-
-            return get_listing(
-                request,
-                title=title,
-                message="Comment Added",
-            )
+            return get_listing(request, title=title)
     return redirect(request.META["HTTP_REFERER"])

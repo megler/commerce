@@ -33,11 +33,7 @@
           <p class="lead">{{ item.description }}</p>
           <div class="fs-5 ">Current Bid: ${{ current_bid }}
             USD</div>
-          <div class="mb-3 text-danger">
-            {% if message %}
-              <div>{{ message }}</div>
-            {% endif %}
-          </div>
+
           {% if item.status %}
             <form action="{% url 'bid_item' title=item.item_name %}" method="post">
               <div class="d-flex flex-row">
@@ -58,8 +54,9 @@
               <p class="text-success">The seller will contact you shortly for shipping instructions.</p>
             {% endif %}
           </div>
-
+          {% include 'auctions/includes/messages.html' %}
           {% if request.user.is_authenticated %}
+
             {% if item.id in verify_watchlist %}
               <p class="text-success mt-3">Item currently in watchlist.
               </p>
@@ -96,11 +93,7 @@
             {% if not request.user.is_authenticated %}
               <p class="text-danger">Please login to make a comment.</p>
             {% endif %}
-            <div class="mb-3 text-success">
-              {% if message %}
-                <div>{{ message }}</div>
-              {% endif %}
-            </div>
+
             {% if request.user.is_authenticated %}
               <div class="mt-3 d-flex flex-row align-items-center p-3 comment-form-color">
                 {# Credit Image: https://pottertar.framiq.com/ #}
