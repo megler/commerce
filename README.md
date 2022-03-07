@@ -31,11 +31,5 @@ The app can now by run by pointing your browser to [localhost](http://127.0.0.1:
 
 # TODO's
 
-1. Reorganize template messages where a message in 1 place (eg. "You made a bid")
-   will not repeat itself when a comment is added. (eg. "Your comment was saved.")
-2. Add email authentication for new user registration. (MailJet API)
-3. Add stripe and a shopping cart.
-4. Remove starting bid from the listings model. All bid info should be in the bid
-   model only.
-5. Show gravatars in comments even if user isn't currently logged in (eg. all
-   comments have correct gravatars.)
+1. Add email authentication for new user registration. (MailJet API)
+2. Add stripe and a shopping cart.
