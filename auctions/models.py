@@ -1,7 +1,12 @@
 from itertools import product
+from re import L
 from tkinter import CASCADE
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.contrib import admin
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.contrib.auth.models import User
 
 
 class User(AbstractUser):
@@ -28,7 +33,7 @@ class ListAuction(models.Model):
 
     seller = models.ForeignKey(User,
                                null=True,
-                               on_delete=models.SET_NULL,
+                               on_delete=models.CASCADE,
                                related_name="seller")
 
     CONDITION = (("New", "New"), ("Used", "Used"), ("Refurbished",
@@ -61,12 +66,12 @@ class Bid(models.Model):
 
     customer = models.ForeignKey(User,
                                  null=True,
-                                 on_delete=models.SET_NULL,
+                                 on_delete=models.CASCADE,
                                  related_name="user")
     product = models.ForeignKey(
         ListAuction,
         null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         related_name="auction_item",
     )
     bid = models.DecimalField(decimal_places=2, max_digits=7)
@@ -75,6 +80,20 @@ class Bid(models.Model):
 
     def __str__(self):
         return f"Item Bid: {self.product.item_name}"
+
+
+@receiver(post_save, sender=ListAuction)
+def my_handler(sender, **kwargs):
+    get_user = sender.objects.latest("id").seller.id
+    get_product = sender.objects.latest("id").id
+    get_bid = sender.objects.latest("id").starting_bid
+
+    sender.model = Bid.objects.create(
+        customer=User.objects.get(id=get_user),
+        product=sender.objects.get(id=get_product),
+        bid=get_bid,
+        high_bidder=True,
+    )
 
 
 class Watchlist(models.Model):
