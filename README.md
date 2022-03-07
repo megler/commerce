@@ -28,6 +28,8 @@ The app can now by run by pointing your browser to [localhost](http://127.0.0.1:
    watchlist" and give user the option to click a link to see their watchlist.
 10. Watchlist can also be accessed in the top nav if user is logged in.
 11. In the watchlist, a user can delete anything from the list.
+12. Gravatars in comments are user specific. If user has a registered Gravatar
+    it will be used, otherwise a generic will show up.
 
 # TODO's
 
