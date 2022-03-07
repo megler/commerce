@@ -7,6 +7,7 @@ from django.contrib import admin
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
+from . import util
 
 
 class User(AbstractUser):
@@ -82,20 +83,6 @@ class Bid(models.Model):
         return f"Item Bid: {self.product.item_name}"
 
 
-@receiver(post_save, sender=ListAuction)
-def my_handler(sender, **kwargs):
-    get_user = sender.objects.latest("id").seller.id
-    get_product = sender.objects.latest("id").id
-    get_bid = sender.objects.latest("id").starting_bid
-
-    sender.model = Bid.objects.create(
-        customer=User.objects.get(id=get_user),
-        product=sender.objects.get(id=get_product),
-        bid=get_bid,
-        high_bidder=True,
-    )
-
-
 class Watchlist(models.Model):
     """Allows user to add or delete item from watchlist"""
 
@@ -139,3 +126,18 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by User: {self.user.username} | Item: {self.product.item_name}"
+
+
+# Receivers
+@receiver(post_save, sender=ListAuction)
+def my_handler(sender, **kwargs):
+    get_user = sender.objects.latest("id").seller.id
+    get_product = sender.objects.latest("id").id
+    get_bid = sender.objects.latest("id").starting_bid
+
+    sender.model = Bid.objects.create(
+        customer=User.objects.get(id=get_user),
+        product=sender.objects.get(id=get_product),
+        bid=get_bid,
+        high_bidder=True,
+    )
