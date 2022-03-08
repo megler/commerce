@@ -210,7 +210,7 @@ def end_auction(request, id=None):
     listing.status = False
     listing.save()
     # Credit: https://stackoverflow.com/questions/2005822/django-forms-reload-view-after-post
-    return redirect(request.META["HTTP_REFERER"])
+    return redirect(request.META.get("HTTP_REFERER"))
 
 
 def bid_item(request, title):
@@ -222,7 +222,7 @@ def bid_item(request, title):
     if request.method == "POST":
         if not request.user.is_authenticated:
             messages.error(request, "You need to be logged in to bid.")
-            return redirect(request.META["HTTP_REFERER"])
+            return redirect(request.META.get("HTTP_REFERER"))
 
         if request.user.is_authenticated and get_listing_info.status:
             bid_amt = float(request.POST["bid-amt"])
@@ -232,13 +232,13 @@ def bid_item(request, title):
                     request,
                     "Your bid needs to be equal to or higher than the starting bid.",
                 )
-                return redirect(request.META["HTTP_REFERER"])
+                return redirect(request.META.get("HTTP_REFERER"))
             if bid_amt <= get_bid.bid and get_bid.bid > get_listing_info.starting_bid:
                 messages.error(
                     request,
                     "Your bid needs to be greater than the current high bid.",
                 )
-                return redirect(request.META["HTTP_REFERER"])
+                return redirect(request.META.get("HTTP_REFERER"))
             else:
                 # remove current high bidder and add new high bidder
                 get_bid.high_bidder = False
@@ -254,9 +254,9 @@ def bid_item(request, title):
                     request,
                     "You are now the highest bidder!",
                 )
-                return redirect(request.META["HTTP_REFERER"])
+                return redirect(request.META.get("HTTP_REFERER"))
 
-    return redirect(request.META["HTTP_REFERER"])
+    return redirect(request.META.get("HTTP_REFERER"))
 
 
 def add_to_watchlist(request, title):
@@ -274,14 +274,14 @@ def add_to_watchlist(request, title):
                 request,
                 "Item added to watchlist.",
             )
-            return redirect(request.META["HTTP_REFERER"])
+            return redirect(request.META.get("HTTP_REFERER"))
         else:
             messages.error(
                 request,
                 "You must be logged in to have a watchlist.",
             )
-            return redirect(request.META["HTTP_REFERER"])
-    return redirect(request.META["HTTP_REFERER"])
+            return redirect(request.META.get("HTTP_REFERER"))
+    return redirect(request.META.get("HTTP_REFERER"))
 
 
 @login_required(login_url="login")
@@ -291,7 +291,7 @@ def delete_from_watchlist(request, id=None):
     # Credit: https://stackoverflow.com/questions/44248228/django-how-to-delete-a-object-directly-from-a-button-in-a-table
     object = Watchlist.objects.get(id=id)
     object.delete()
-    return redirect(request.META["HTTP_REFERER"])
+    return redirect(request.META.get("HTTP_REFERER"))
 
 
 @login_required(login_url="login")
@@ -314,5 +314,5 @@ def add_comment(request, title, message=""):
                 comment=comment,
             )
             p.save()
-            return redirect(request.META["HTTP_REFERER"])
-    return redirect(request.META["HTTP_REFERER"])
+            return redirect(request.META.get("HTTP_REFERER"))
+    return redirect(request.META.get("HTTP_REFERER"))
