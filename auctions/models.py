@@ -129,13 +129,15 @@ class Comment(models.Model):
 # Receivers
 @receiver(post_save, sender=ListAuction)
 def my_handler(sender, **kwargs):
-    get_user = sender.objects.latest("id").seller.id
-    get_product = sender.objects.latest("id").id
-    get_bid = sender.objects.latest("id").starting_bid
+    get_status = sender.objects.latest("id").status
+    if get_status:
+        get_user = sender.objects.latest("id").seller.id
+        get_product = sender.objects.latest("id").id
+        get_bid = sender.objects.latest("id").starting_bid
 
-    sender.model = Bid.objects.create(
-        customer=User.objects.get(id=get_user),
-        product=sender.objects.get(id=get_product),
-        bid=get_bid,
-        high_bidder=True,
-    )
+        sender.model = Bid.objects.create(
+            customer=User.objects.get(id=get_user),
+            product=sender.objects.get(id=get_product),
+            bid=get_bid,
+            high_bidder=True,
+        )
