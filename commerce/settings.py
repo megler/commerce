@@ -77,12 +77,8 @@ WSGI_APPLICATION = "commerce.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "accio-auctions-db",  # The Server name from 1.5
-        "USER": "postgres",  # The username from 1.6
-        "PASSWORD": "Charliesmom#1",  # The password from installation
-        "HOST": "localhost",  # Host name/address from 1.6,
-        "PORT": "5432",  # Port from 1.6
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
     }
 }
 
