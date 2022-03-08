@@ -1,0 +1,22 @@
+{% extends "auctions/layout.html" %}
+{% block title %}
+  Accio Auctions - Product Categories
+{% endblock %}
+{% block body %}
+  <!-- Section-->
+  <section class="py-5">
+    <div class="container px-4 px-lg-5 mt-5">
+      <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4">
+        <div class="col-12">
+          <h2>Categories</h2>
+          {# Loop through category table for list of categories #}
+          {% for category in categories %}
+            <div class="col-lg-6 col-md-4 col-sm-3 col-xs-2 ">
+              <a href="{% url 'listings_by_cat' cat=category %}">{{ category }}</a>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "auctions/layout.html" %}
+{% load humanize %}
+{% load app_tags %}
+{% block title %}
+  Accio Auctions -
+  {{ item.item_name }}
+{% endblock %}
+{% block body %}
+  <section class="py-5">
+    <div class="container px-4 px-lg-5 my-5">
+      <div class="row gx-4 gx-lg-5 align-items-center">
+        <div class="col-md-6">
+          {% if item.listing_image %}
+            <img class="card-img-top mb-5 mb-md-0" src="{{ item.listing_image }}" alt="{{item.item_name}}"/>
+          {% else %}
+            <img class="card-img-top mb-5 mb-md-0" src="../static/auctions/images/Light-Harry-Potter-Background.jpg" alt="{{ cat.product.item_name }} placeholder image"/>
+          {% endif %}
+        </div>
+        <div class="col-md-6">
+          <div class="small mb-1">Category:
+            <a href="{% url 'listings_by_cat' cat=category %}">{{ category }}</a>
+          </div>
+          <h1 class="display-5 fw-bolder">{{ item.item_name }}</h1>
+          <div class="fs-5 mb-2">Available Quantity:
+            {{ item.quantity }}</div>
+          <div class="fs-6 mb-2">Condition:
+            {{ item.item_condition }}</div>
+          <div class="fs-6 mb-5">Time Left:
+            {{ expire_date|naturaltime }}
+            |
+            {{ expire_date }}
+          </div>
+
+          <p class="lead">{{ item.description }}</p>
+          <div class="fs-5 ">Current Bid: ${{ current_bid }}
+            USD</div>
+
+          {% if item.status %}
+            <form action="{% url 'bid_item' title=item.item_name %}" method="post">
+              <div class="d-flex flex-row">
+                {% csrf_token %}
+                <input type="textbox" class="form-control text-center me-3" id="currency-field" placeholder="Bid Amount" name="bid-amt"/>
+                <button class="btn btn-outline-dark flex-shrink-0" type="submit">
+                  <i class="bi-cart-fill me-1"></i>
+                  Bid Now
+                </button>
+              </div>
+            </form>
+          {% else %}
+            <p class="text-danger">Sorry, this auction is no longer active.</p>
+          {% endif %}
+          <div class="fs-6 mb-2">
+            {% if request.user.is_authenticated and high_bidder == user.id and not item.status%}
+              <p class="text-success">Congratulations! You are the winner!</p>
+              <p class="text-success">The seller will contact you shortly for shipping instructions.</p>
+            {% endif %}
+          </div>
+          {% include 'auctions/includes/messages.html' %}
+          {% if request.user.is_authenticated %}
+
+            {% if item.id in verify_watchlist %}
+              <p class="text-success mt-3">Item currently in watchlist.
+              </p>
+              <a href="{% url 'show_watchlist' %}">Show Watchlist</a>
+            {% else %}
+              <form action="{% url 'add_to_watchlist' title=item.item_name %}" method="post">
+                {% csrf_token %}
+                <div class="small mt-4">
+                  <button class="btn_link mb-3" type="submit">Add to Watchlist</button>
+                </div>
+              </form>
+            {% endif %}
+          {% endif %}
+
+          {% if request.user.is_authenticated and item.seller_id == user.id %}
+            <div class="mt-3">
+              <a class="text-danger" href="{% url 'end_auction' id=item.id %}">End Auction</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+  {# BEGIN COMMENTS #}
+  {# template credit: https://gosnippets.com/snippets/bootstrap-5-user-comment-section-template-snippets #}
+  <section>
+    <div class="container mt-5 mb-5">
+      <div class="row height d-flex justify-content-center align-items-center">
+        <div class="col-md-7">
+          <div class="comment-card">
+            <div class="p-3">
+              <h6>Comments</h6>
+            </div>
+            {% if not request.user.is_authenticated %}
+              <p class="text-danger">Please login to make a comment.</p>
+            {% endif %}
+
+            {% if request.user.is_authenticated %}
+              <div class="mt-3 d-flex flex-row align-items-center p-3 comment-form-color">
+                {# Credit Image: https://pottertar.framiq.com/ #}
+
+                <img src="{{ user|gravatar:50 }}" width="40" height="40" class="rounded-circle me-3"/>
+                <form action="{% url 'add_comment' title=item.item_name %}" method="post">
+                  {% csrf_token %}
+                  <input type="text" class="comment-form-control" name="comment" placeholder="Enter your comment...">
+                </form>
+              </div>
+            {% endif %}
+            {% for comment in comments %}
+              <div class="mt-2">
+                <div class="d-flex flex-row p-3">
+                  <img src="{{ comment.user|gravatar:50 }}" width="40" height="40" class="rounded-circle me-3"/>
+                  <div class="w-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="d-flex flex-row align-items-center">
+                        <span class="mr-2">{{ comment.user.username }}</span>
+                      </div>
+                    </div>
+                    <p class="text-justify comment-text mb-0">{{ comment.comment }}</p>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% endblock%}
