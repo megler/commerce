@@ -222,10 +222,8 @@ def bid_item(request, title):
     if request.method == "POST":
         if not request.user.is_authenticated:
             messages.error(request, "You need to be logged in to bid.")
-            return get_listing(
-                request,
-                title=title,
-            )
+            return redirect(request.META["HTTP_REFERER"])
+
         if request.user.is_authenticated and get_listing_info.status:
             bid_amt = float(request.POST["bid-amt"])
             if (bid_amt < get_listing_info.starting_bid
@@ -234,16 +232,13 @@ def bid_item(request, title):
                     request,
                     "Your bid needs to be equal to or higher than the starting bid.",
                 )
-                return get_listing(request, title=title)
+                return redirect(request.META["HTTP_REFERER"])
             if bid_amt <= get_bid.bid and get_bid.bid > get_listing_info.starting_bid:
                 messages.error(
                     request,
                     "Your bid needs to be greater than the current high bid.",
                 )
-                return get_listing(
-                    request,
-                    title=title,
-                )
+                return redirect(request.META["HTTP_REFERER"])
             else:
                 # remove current high bidder and add new high bidder
                 get_bid.high_bidder = False
@@ -259,7 +254,7 @@ def bid_item(request, title):
                     request,
                     "You are now the highest bidder!",
                 )
-                return get_listing(request, title=title)
+                return redirect(request.META["HTTP_REFERER"])
 
     return redirect(request.META["HTTP_REFERER"])
 
@@ -279,13 +274,13 @@ def add_to_watchlist(request, title):
                 request,
                 "Item added to watchlist.",
             )
-            return get_listing(request, title=title)
+            return redirect(request.META["HTTP_REFERER"])
         else:
             messages.error(
                 request,
                 "You must be logged in to have a watchlist.",
             )
-            return get_listing(request, title=title)
+            return redirect(request.META["HTTP_REFERER"])
     return redirect(request.META["HTTP_REFERER"])
 
 
@@ -319,5 +314,5 @@ def add_comment(request, title, message=""):
                 comment=comment,
             )
             p.save()
-            return get_listing(request, title=title)
+            return redirect(request.META["HTTP_REFERER"])
     return redirect(request.META["HTTP_REFERER"])
