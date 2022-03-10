@@ -4,7 +4,9 @@ A Django based auction application themed with Harry Potter
 
 ## Usage
 
-In the terminal, change directory into `commerce` and run `python manage.py runserver`.
+This branch holds the code with additional files to roll out to Heroku. New features
+will be added to this branch and not main, but for the moment the two need to be
+kept seperate.
 
 The app can now by run by pointing your browser to [localhost](http://127.0.0.1:8000/).
 
