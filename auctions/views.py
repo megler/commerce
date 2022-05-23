@@ -133,42 +133,44 @@ def active_by_cat(request, cat):
 @login_required(login_url="login")
 def create_listing(request):
     """ Allow logged in user to create a new listing """
-
-    # Credit: https://forum.djangoproject.com/t/automatically-get-user-id-to-assignate-to-form-when-submitting/5333/6
-
-    # MSG-TO-TA - I don't know why this needs to be here twice, but the form
-    # renders incorrectly if you don't.
-
-    form = ListAuctionForm(user=request.user)
-
-    if request.method == "POST":
+    if request.POST:
         form = ListAuctionForm(request.POST, user=request.user)
-
         if form.is_valid():
-            # Save form submission
-            obj = form.save(commit=False)
-            obj.seller = User.objects.get(pk=request.user.id)
-            obj.save()
-            with transaction.atomic():
-                # Also push starting bid to bid table
-                product_id = ListAuction.objects.get(
-                    item_name=form.cleaned_data["item_name"]).id
-                bid = ListAuction.objects.get(
-                    starting_bid=form.cleaned_data["starting_bid"]
-                ).starting_bid
-                new_bid = Bid(
-                    bid=bid,
-                    customer_id=request.user.id,
-                    product_id=product_id,
-                    high_bidder=True,
-                )
-                new_bid.save()
+
+            item_name = form.cleaned_data["item_name"]
+            starting_bid = form.cleaned_data["starting_bid"]
+            quantity = form.cleaned_data["quantity"]
+            description = form.cleaned_data["description"]
+            item_condition = form.cleaned_data["item_condition"]
+            categories = form.cleaned_data["categories"]
+            listing_image = form.cleaned_data["listing_image"]
+            seller_id = request.user
+            new_listing = ListAuction(
+                seller=seller_id,
+                item_name=item_name,
+                starting_bid=starting_bid,
+                quantity=quantity,
+                description=description,
+                item_condition=item_condition,
+                categories=categories,
+                listing_image=listing_image,
+            )
+            new_listing.save()
+            new_bid = Bid(
+                bid=starting_bid,
+                customer_id=request.user.id,
+                high_bidder=True,
+            )
+            new_bid.save()
             return HttpResponseRedirect(reverse("index"))
+
         else:
             return render(request, "auctions/create-listing.html",
                           {"message": form.errors})
-    context = {"form": form}
-    return render(request, "auctions/create-listing.html", context)
+    else:
+        form = ListAuctionForm(user=request.user)
+        context = {"form": form}
+        return render(request, "auctions/create-listing.html", context)
 
 
 def get_listing(request, title, message=""):
